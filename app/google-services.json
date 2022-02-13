@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "917972303077",
+    "project_id": "kvmusicplayer-f33ad",
+    "storage_bucket": "kvmusicplayer-f33ad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917972303077:android:930c371877a415f54fa80c",
+        "android_client_info": {
+          "package_name": "hr.ferit.aleksamedakovic.orwma_kv"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917972303077-be43dismbu5kuarp15kv3lrdrec10o4m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDr6RcWOfLUOM3ZsomWa2xFbGcHLKGvU9c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "917972303077-be43dismbu5kuarp15kv3lrdrec10o4m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
