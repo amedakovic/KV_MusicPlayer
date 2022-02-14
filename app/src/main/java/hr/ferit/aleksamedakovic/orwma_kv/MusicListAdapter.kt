@@ -2,19 +2,19 @@ package hr.ferit.aleksamedakovic.orwma_kv
 
 import android.content.Intent
 import android.provider.MediaStore
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
+
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import org.jetbrains.annotations.NotNull
-import org.w3c.dom.Text
+
 
 class MusicListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    companion object{  var items: List<AudioData> = ArrayList()}
+    lateinit var items: List<AudioData>
 
 
 
@@ -69,5 +69,11 @@ class MusicListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             ArtistName.text = audioData.artist
             AlbumName.text = audioData.album
         }
+    }
+
+    fun update(list : ArrayList<AudioData>){
+        items = ArrayList()
+        (items as MutableList<AudioData>).addAll(list)
+        notifyDataSetChanged()
     }
 }

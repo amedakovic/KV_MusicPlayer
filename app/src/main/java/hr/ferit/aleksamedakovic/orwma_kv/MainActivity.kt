@@ -1,35 +1,32 @@
 package hr.ferit.aleksamedakovic.orwma_kv
 
 import android.Manifest
-import android.app.Activity
-import android.content.Context
+
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
-import android.text.TextUtils.replace
-import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+
 import java.util.*
+import kotlin.collections.ArrayList
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener{
 
    // private val READ_EXTERNAL_STORAGE : Int = 1
 
-    companion object{
-        lateinit var AudioAdapter: MusicListAdapter
-        lateinit var FavAdapter : FavoritesListAdapter
-    }
+
+    companion object{var items: ArrayList<AudioData> = ArrayList()}
 
     lateinit var bottomNavView : BottomNavigationView
 
@@ -39,15 +36,11 @@ class MainActivity : AppCompatActivity() {
         bottomNavView = findViewById(R.id.bottomNavigationView)
 
         checkPermission()
-        FavAdapter = FavoritesListAdapter()
-        AudioAdapter = MusicListAdapter()
-        AudioAdapter.postItemsList(loadAudioFiles())
+        items = loadAudioFiles()
         val SongFragment = SongsFragment()
         val FavFragment = FavoritesFragment()
-
+        FavFragment.loadFavSongs()
         setCurrentFragment(SongFragment)
-
-
 
 
          bottomNavView.setOnNavigationItemSelectedListener {
@@ -58,22 +51,10 @@ class MainActivity : AppCompatActivity() {
                  true
          }
 
-        //val recyclerView : RecyclerView = findViewById(R.id.recyclerView)
-        //initView()
 
-        //recyclerView.setAdapter(MusicListAdapter())
     }
 
-   /* override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if(requestCode == READ_EXTERNAL_STORAGE){
-            if(grantResults.size > 8 && grantResults[0] == PackageManager.PERMISSION_DENIED)
-        }
-    }*/
+
 
     private fun setCurrentFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction().apply {
@@ -81,12 +62,7 @@ class MainActivity : AppCompatActivity() {
             commit()
         }
     }
-     /*fun initView() {
-        findViewById<RecyclerView>(R.id.recyclerView).apply {
-            layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = AudioAdapter
-        }
-    }*/
+
 
      private fun checkPermission(){
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)==
@@ -95,18 +71,41 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-     private fun  loadAudioFiles(): ArrayList<AudioData> {
+
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.search, menu)
+        val menuItem : MenuItem = menu!!.findItem(R.id.searchOption)
+        val searchView : SearchView = menuItem.actionView as SearchView
+        searchView.setOnQueryTextListener(this)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onQueryTextSubmit(p0: String?): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun onQueryTextChange(p0: String?): Boolean {
+        var userInput : String = p0!!.toLowerCase()
+        var files : ArrayList<AudioData> = ArrayList()
+        for(song in items){
+            if(song.name.toLowerCase().contains(userInput))
+                files.add(song)
+        }
+        SongsFragment.AudioAdapter.update(files)
+        return true
+    }
+
+
+    private fun  loadAudioFiles(): ArrayList<AudioData> {
         val tempArr: ArrayList<AudioData> = ArrayList()
 
         val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        val projection = arrayOf(MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA,
+        val projection = arrayOf(
+            MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.ALBUM_ID,
             MediaStore.Audio.Media.DURATION)
-      /*  val projection : Array<String> = {
-            MediaStore.Audio.AudioColumns.TITLE
-            MediaStore.Audio.AudioColumns.DATA
 
-        };*/
         val cursor: Cursor? = this.contentResolver.query(uri, projection, null, null, null)
         cursor?.moveToFirst()
         if(cursor!=null){

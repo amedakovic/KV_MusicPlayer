@@ -5,38 +5,31 @@ import android.os.Bundle
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
-import android.content.Intent
-import android.media.Image
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Handler
-import android.provider.ContactsContract
-import android.util.Log
-import android.widget.Toast
 import com.google.firebase.database.*
-import com.google.firebase.database.ktx.getValue
-import java.lang.Exception
 
 class MusicPlayerActivity : AppCompatActivity() {
 
     var rootNode : FirebaseDatabase = FirebaseDatabase.getInstance("https://kvmusicplayer-f33ad-default-rtdb.europe-west1.firebasedatabase.app")
     var reference : DatabaseReference = rootNode.getReference("Songs")
 
-    lateinit var song_name : TextView
-    lateinit var artist_name : TextView
-    lateinit var duration_played : TextView
-    lateinit var duration_total : TextView
-    lateinit var cover_art : ImageView
-    lateinit var play_pause_btn: ImageView
-    lateinit var play_next: ImageView
-    lateinit var play_previous: ImageView
-    lateinit var backBtn : ImageView
-    lateinit var seek_bar : SeekBar
-    var position: Int = -1
-    lateinit var uri : Uri
-    private var song_list: List<AudioData> = ArrayList()
+    private lateinit var songName : TextView
+    private lateinit var artistName : TextView
+    private lateinit var durationPlayed : TextView
+    private lateinit var durationTotal : TextView
+    private lateinit var coverArt : ImageView
+    private lateinit var playPauseBtn: ImageView
+    private lateinit var playNext: ImageView
+    private lateinit var playPrevious: ImageView
+    private lateinit var backBtn : ImageView
+    private lateinit var seekBar : SeekBar
+    private var position: Int = -1
+    private lateinit var uri : Uri
+    private var songList: List<AudioData> = ArrayList()
     private var handler: Handler = Handler()
-    companion object{ var media_player : MediaPlayer? = null}
+    companion object{ var mediaPlayer : MediaPlayer? = null}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,10 +38,10 @@ class MusicPlayerActivity : AppCompatActivity() {
         initViews()
         getIntentMethod()
 
-        seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                if( media_player != null && p2)
-                    media_player?.seekTo(p1 * 1000)
+                if( mediaPlayer != null && p2)
+                    mediaPlayer?.seekTo(p1 * 1000)
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -62,38 +55,38 @@ class MusicPlayerActivity : AppCompatActivity() {
         })
         this@MusicPlayerActivity.runOnUiThread(object : Runnable{
             override fun run() {
-                if(media_player != null){
-                    var currentPostion: Int = media_player!!.currentPosition/1000
-                    seek_bar.setProgress(currentPostion)
-                    duration_played.text = (formattedTime(currentPostion))
+                if(mediaPlayer != null){
+                    var currentPostion: Int = mediaPlayer!!.currentPosition/1000
+                    seekBar.setProgress(currentPostion)
+                    durationPlayed.text = (formattedTime(currentPostion))
                 }
                 handler.postDelayed(this, 1000)
             }
         })
 
 
-        play_pause_btn.setOnClickListener{
-            if(media_player?.isPlaying == true) {
-                play_pause_btn.setImageResource(R.drawable.ic_play_arrow)
-                media_player?.pause()
+        playPauseBtn.setOnClickListener{
+            if(mediaPlayer?.isPlaying == true) {
+                playPauseBtn.setImageResource(R.drawable.ic_play_arrow)
+                mediaPlayer?.pause()
             }else{
-                play_pause_btn.setImageResource(R.drawable.ic_pause)
-                media_player?.start()
+                playPauseBtn.setImageResource(R.drawable.ic_pause)
+                mediaPlayer?.start()
             }
         }
 
-        play_next.setOnClickListener {
-            if(position != MusicListAdapter.items.size){
+        playNext.setOnClickListener {
+            if(position != MainActivity.items.size){
                 position += 1
-                uri = Uri.parse(song_list.get(position).path)
+                uri = Uri.parse(songList.get(position).path)
                 playMusicPlayer()
             }
         }
 
-        play_previous.setOnClickListener {
+        playPrevious.setOnClickListener {
             if(position != 0){
                 position -= 1
-                uri = Uri.parse(song_list.get(position).path)
+                uri = Uri.parse(songList.get(position).path)
                 playMusicPlayer()
             }
         }
@@ -106,8 +99,8 @@ class MusicPlayerActivity : AppCompatActivity() {
     }
 
     private fun formattedTime(currentPostion: Int):String{
-        var totalout: String = ""
-        var totalWithZero: String = ""
+        var totalout: String
+        var totalWithZero: String
         var seconds: String = (currentPostion % 60).toString()
         var minutes: String = (currentPostion / 60).toString()
         totalout = "${minutes}:${seconds}"
@@ -120,43 +113,43 @@ class MusicPlayerActivity : AppCompatActivity() {
     
     private fun getIntentMethod(){
         position = intent.getIntExtra("position", -1)
-        song_list = MusicListAdapter.items
-        if(song_list != null){
-            uri = Uri.parse(song_list.get(position).path)
+        songList = MainActivity.items
+        if(songList != null){
+            uri = Uri.parse(songList.get(position).path)
         }
         playMusicPlayer()
 
     }
 
     private fun initViews(){
-        song_name = findViewById(R.id.MP_song_name)
-        artist_name = findViewById(R.id.MP_artist_name)
-        duration_played = findViewById(R.id.MP_duration_played)
-        duration_total = findViewById(R.id.MP_duration_total)
-        cover_art = findViewById(R.id.MP_cover_art)
-        play_pause_btn = findViewById(R.id.MP_play_pause)
-        seek_bar = findViewById(R.id.MP_seek_bar)
-        play_next = findViewById(R.id.MP_skip_next)
-        play_previous = findViewById(R.id.MP_skip_previous)
+        songName = findViewById(R.id.MP_song_name)
+        artistName = findViewById(R.id.MP_artist_name)
+        durationPlayed = findViewById(R.id.MP_duration_played)
+        durationTotal = findViewById(R.id.MP_duration_total)
+        coverArt = findViewById(R.id.MP_cover_art)
+        playPauseBtn = findViewById(R.id.MP_play_pause)
+        seekBar = findViewById(R.id.MP_seek_bar)
+        playNext = findViewById(R.id.MP_skip_next)
+        playPrevious = findViewById(R.id.MP_skip_previous)
         backBtn = findViewById(R.id.MP_back_btn)
     }
 
     private  fun playMusicPlayer(){
-        play_pause_btn.setImageResource(R.drawable.ic_pause)
-        if(media_player?.isPlaying == true){
-            media_player?.stop()
-            media_player?.release()
-            media_player = MediaPlayer.create(this, uri)
-            media_player?.start()
+        playPauseBtn.setImageResource(R.drawable.ic_pause)
+        if(mediaPlayer?.isPlaying == true){
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            mediaPlayer = MediaPlayer.create(this, uri)
+            mediaPlayer?.start()
         }
         else{
-            media_player = MediaPlayer.create(this, uri)
-            media_player?.start()
+            mediaPlayer = MediaPlayer.create(this, uri)
+            mediaPlayer?.start()
         }
-        seek_bar.max = media_player!!.duration / 1000
-        duration_total.text = formattedTime(seek_bar.max)
+        seekBar.max = mediaPlayer!!.duration / 1000
+        durationTotal.text = formattedTime(seekBar.max)
 
-        sendToFirebase(song_list.get(position).name, song_list.get(position).artist,"1",song_list.get(position).albumImagePath.toString())
+        sendToFirebase(songList.get(position).name, songList.get(position).artist,"1",songList.get(position).albumImagePath.toString())
 
         setSongData()
 
@@ -188,9 +181,9 @@ class MusicPlayerActivity : AppCompatActivity() {
 
 
     private fun setSongData(){
-        cover_art.setImageURI(song_list.get(position).albumImagePath)
-        song_name.text = song_list.get(position).name
-        artist_name.text = song_list.get(position).artist
+        coverArt.setImageURI(songList.get(position).albumImagePath)
+        songName.text = songList.get(position).name
+        artistName.text = songList.get(position).artist
     }
 }
 
